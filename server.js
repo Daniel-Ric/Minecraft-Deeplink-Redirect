@@ -19,7 +19,7 @@ app.get('/DressingRoomOffer/:itemId', (req, res) => {
     res.redirect(minecraftUrl);
 });
 
-// Start des Servers
+// Start des Servers auf PORT
 app.listen(PORT, () => {
     console.log(`Server läuft auf http://localhost:${PORT}`);
 });
