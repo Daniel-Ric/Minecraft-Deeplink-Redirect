@@ -7,8 +7,7 @@
 [![Framework](https://img.shields.io/badge/framework-Express-000?logo=express)](#)
 [![License](https://img.shields.io/badge/license-Apache_2.0-blue)](#)
 
-Repo: `[https://github.com/Daniel-Ric/Minecraft-Deeplink-Redirect](https://github.com/Daniel-Ric/Minecraft-Deeplink-Redirect)`
-
+Repo: [https://github.com/Daniel-Ric/Minecraft-Deeplink-Redirect](https://github.com/Daniel-Ric/Minecraft-Deeplink-Redirect)
 ---
 
 ## Why?
