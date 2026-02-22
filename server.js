@@ -97,6 +97,12 @@ app.get('/JoinGathering/:gatheringId', (req, res) => {
     res.redirect(minecraftUrl);
 });
 
+app.get('/JoinExperience/:experienceId', (req, res) => {
+    const experienceId = req.params.experienceId;
+    const minecraftUrl = `minecraft://joinExperience?experienceId=${experienceId}`;
+    res.redirect(minecraftUrl);
+});
+
 app.get('/SlashCommand', (req, res) => {
     const command = req.query.command || '';
     const minecraftUrl = `minecraft://?slashcommand=${encodeURIComponent(command)}`;
