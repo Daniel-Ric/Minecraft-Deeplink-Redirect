@@ -108,6 +108,7 @@ This project gives you a **tiny HTTP façade**:
 |    GET | `/ConnectRealmById/:realmId`      | Connect to a Realm by its numeric ID | `minecraft://connectToRealm?realmId=:realmId`        |
 |    GET | `/ConnectRealmByInvite/:inviteId` | Connect to a Realm using invite code | `minecraft://connectToRealm?inviteID=:inviteId`      |
 |    GET | `/JoinGathering/:gatheringId`     | Join a gathering / in‑game event     | `minecraft://joinGathering?gatheringId=:gatheringId` |
+|    GET | `/JoinExperience/:experienceId`     | Join a "new" experiance server     | `minecraft://joinExperience?experienceId=experienceId` |
 
 ---
 
