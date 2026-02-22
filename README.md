@@ -7,7 +7,7 @@
 [![Framework](https://img.shields.io/badge/framework-Express-000?logo=express)](#)
 [![License](https://img.shields.io/badge/license-Apache_2.0-blue)](#)
 
-*Repo: [https://github.com/Daniel-Ric/Minecraft-Deeplink-Redirect](https://github.com/Daniel-Ric/Minecraft-Deeplink-Redirect)*
+*Repo: https://github.com/Daniel-Ric/Minecraft-Deeplink-Redirect*
 
 ## Why?
 
@@ -16,7 +16,8 @@ Minecraft Bedrock supports a **`minecraft://` URL scheme** that can:
 - Open marketplace offers or the store home
 - Jump into profile / dressing room and “How to Play”
 - Add external servers or directly connect to them
-- Join Realms, gatherings/events, and load local worlds
+- Join Realms, gatherings/events, **and Experiences**
+- Load local worlds
 - Execute a slash command in context
 
 However, these URLs:
@@ -36,7 +37,7 @@ This project gives you a **tiny HTTP façade**:
 ## Features
 
 - 🌐 Simple REST-style routes → `minecraft://` deeplinks
-- 🧱 Supports a curated set of **Bedrock deeplinks** (store, UI, servers, realms, events, commands)
+- 🧱 Supports a curated set of **Bedrock deeplinks** (store, UI, servers, realms, events, experiences, commands)
 - 🔄 Zero state: no database, no sessions, just redirects
 - 🚀 Ready for Docker, reverse proxy, or serverless setups
 - 🔒 CORS allowed for all origins by default (easy integration with any frontend)
@@ -100,14 +101,30 @@ This project gives you a **tiny HTTP façade**:
 
 ---
 
-### 4. Realms & Gatherings
+### 4. Realms, Gatherings & Experiences
 
-| Method | Path                              | Description                          | Redirect target                                      |
-|-------:|-----------------------------------|--------------------------------------|------------------------------------------------------|
-|    GET | `/AcceptRealmInvite/:inviteId`    | Accept a Realms invite               | `minecraft://acceptRealmInvite?inviteID=:inviteId`   |
-|    GET | `/ConnectRealmById/:realmId`      | Connect to a Realm by its numeric ID | `minecraft://connectToRealm?realmId=:realmId`        |
-|    GET | `/ConnectRealmByInvite/:inviteId` | Connect to a Realm using invite code | `minecraft://connectToRealm?inviteID=:inviteId`      |
-|    GET | `/JoinGathering/:gatheringId`     | Join a gathering / in‑game event     | `minecraft://joinGathering?gatheringId=:gatheringId` |
+| Method | Path                              | Description                               | Redirect target                                        |
+|-------:|-----------------------------------|-------------------------------------------|--------------------------------------------------------|
+|    GET | `/AcceptRealmInvite/:inviteId`    | Accept a Realms invite                    | `minecraft://acceptRealmInvite?inviteID=:inviteId`     |
+|    GET | `/ConnectRealmById/:realmId`      | Connect to a Realm by its numeric ID      | `minecraft://connectToRealm?realmId=:realmId`          |
+|    GET | `/ConnectRealmByInvite/:inviteId` | Connect to a Realm using invite code      | `minecraft://connectToRealm?inviteID=:inviteId`        |
+|    GET | `/JoinGathering/:gatheringId`     | Join a gathering / in‑game event          | `minecraft://joinGathering?gatheringId=:gatheringId`   |
+|    GET | `/JoinExperience/:experienceId`   | Join an Experience (no IP/port needed)    | `minecraft://joinExperience?experienceId=:experienceId`|
+
+**About `experienceId` (Experience servers)**
+
+`minecraft://joinExperience?experienceId=<uuid>` lets players join so‑called *Experience* servers without exposing an IP/port.
+
+Where does the ID come from?
+
+- The `experienceId` corresponds to the **PlayFab item ID** of the creator’s “root” item  
+  (the item that represents the Marketplace Creator in PlayFab and makes them appear as a creator in the Bedrock Marketplace).
+
+Example deeplink:
+
+- `minecraft://joinExperience?experienceId=c35f0f8f-857a-49cd-8696-07bb93863166`
+
+> ⚠️ These behaviours are community‑discovered and may change between client versions/platforms.
 
 ---
 
@@ -132,8 +149,8 @@ This project gives you a **tiny HTTP façade**:
 
 ```bash
 # 1) Clone
-git clone https://github.com/Daniel-Ric/Minecraft-Store-Redirect
-cd Minecraft-Store-Redirect
+git clone https://github.com/Daniel-Ric/Minecraft-Deeplink-Redirect
+cd Minecraft-Deeplink-Redirect
 
 # 2) Install dependencies
 npm ci
@@ -251,6 +268,13 @@ app.get('/JoinGathering/:gatheringId', (req, res) => {
     res.redirect(minecraftUrl);
 });
 
+// NEW: Experience join (no IP/port)
+app.get('/JoinExperience/:experienceId', (req, res) => {
+    const experienceId = req.params.experienceId;
+    const minecraftUrl = `minecraft://joinExperience?experienceId=${encodeURIComponent(experienceId)}`;
+    res.redirect(minecraftUrl);
+});
+
 app.get('/SlashCommand', (req, res) => {
     const command = req.query.command || '';
     const minecraftUrl = `minecraft://?slashcommand=${encodeURIComponent(command)}`;
@@ -288,6 +312,18 @@ Response (simplified):
 ```http
 HTTP/1.1 302 Found
 Location: minecraft://openStore?showStoreOffer=<ITEM_ID>
+```
+
+### Join an Experience
+
+```bash
+# Replace <EXPERIENCE_ID> with a real UUID
+curl -i "http://localhost:3000/JoinExperience/<EXPERIENCE_ID>"
+```
+
+```http
+HTTP/1.1 302 Found
+Location: minecraft://joinExperience?experienceId=<EXPERIENCE_ID>
 ```
 
 ### Open a dressing room offer
@@ -374,9 +410,9 @@ If the device has Minecraft Bedrock installed, the OS should offer to open the a
     - Minecraft versions
     - Platforms (Windows, mobile, console)
     - Whether the game is currently open/closed
-- Links like `?slashcommand=` or realm/gathering joins may require:
+- Links like `?slashcommand=` or realm/gathering/experience joins may require:
     - A valid user session
-    - Proper permissions on the world/realm
+    - Proper permissions on the world/realm/experience
 
 Test deeplinks carefully before using them in production or sharing them widely.
 
@@ -390,7 +426,7 @@ For public deployments you should consider:
 
 - Restricting allowed origins instead of `Access-Control-Allow-Origin: *`
 - Sanitising / validating:
-    - `itemId`, `realmId`, `gatheringId`, `worldName`, etc.
+    - `itemId`, `realmId`, `gatheringId`, `experienceId`, `worldName`, etc.
     - `command` (for `/SlashCommand`)
 - Adding:
     - Basic rate limiting
