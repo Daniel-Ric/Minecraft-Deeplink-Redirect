@@ -25,6 +25,38 @@ function minecraftRedirect(res, command = '', parameters = {}) {
 
     res.redirect(minecraftUrl);
 }
+
+function requiredQuery(req, res, name) {
+    const value = req.query[name];
+
+    if (typeof value !== 'string' || value.trim() === '') {
+        res.status(400).json({ error: `Missing required query parameter: ${name}` });
+        return null;
+    }
+
+    return value;
+}
+
+function validPort(res, value) {
+    if (!/^\d+$/.test(value) || Number(value) < 1 || Number(value) > 65535) {
+        res.status(400).json({ error: 'port must be an integer between 1 and 65535' });
+        return false;
+    }
+
+    return true;
+}
+
+function allowedValue(res, value, allowed, name) {
+    if (!allowed.has(value)) {
+        res.status(400).json({
+            error: `${name} must be one of: ${Array.from(allowed).join(', ')}`,
+        });
+        return false;
+    }
+
+    return true;
+}
+
 app.get('/StoreOffer/:itemId', (req, res) => {
     minecraftRedirect(res, 'openStore', { showStoreOffer: req.params.itemId });
 });
