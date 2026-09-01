@@ -1,4 +1,5 @@
 const express = require('express');
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -15,10 +16,15 @@ app.use((req, res, next) => {
     next();
 });
 
-app.get('/StoreOffer/:itemId', (req, res) => {
-    const itemId = req.params.itemId;
-    const minecraftUrl = `minecraft://openStore?showStoreOffer=${itemId}`;
+function minecraftRedirect(res, command = '', parameters = {}) {
+    const query = Object.entries(parameters)
+        .filter(([, value]) => value !== undefined && value !== null && value !== '')
+        .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(String(value))}`)
+        .join('&');
+    const minecraftUrl = `minecraft://${command}${query ? `?${query}` : ''}`;
+
     res.redirect(minecraftUrl);
+}
 app.get('/StoreOffer/:itemId', (req, res) => {
     minecraftRedirect(res, 'openStore', { showStoreOffer: req.params.itemId });
 });
@@ -177,6 +183,10 @@ app.get('/SlashCommand', (req, res) => {
     minecraftRedirect(res, '', { slashcommand: command });
 });
 
-app.listen(PORT, () => {
-    console.log(`Server läuft auf http://localhost:${PORT}`);
-});
+if (require.main === module) {
+    app.listen(PORT, () => {
+        console.log(`Server läuft auf http://localhost:${PORT}`);
+    });
+}
+
+module.exports = app;
